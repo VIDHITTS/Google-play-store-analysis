@@ -1,228 +1,145 @@
 # Google Play Store App Success Predictor
 
-A full-stack machine learning application that predicts the success of Google Play Store apps using K-Nearest Neighbors (KNN) algorithm.
+A data mining project that predicts the success of Google Play Store applications using K-Nearest Neighbors (KNN) machine learning algorithm.
 
-## 🎯 Overview
+## 📋 Project Overview
 
-This project analyzes app features (category, size, type, price, content rating) to predict whether an app will be successful on the Google Play Store. The prediction is based on historical data and uses a trained KNN model.
+This project analyzes historical Google Play Store data to predict whether a new app will be successful based on its features such as category, size, type, price, and content rating. The system consists of a Flask backend API with a trained KNN model and a React frontend for user interaction.
 
-## 🏗️ Architecture
+**Live Demo:** [https://frontend-model.netlify.app](https://frontend-model.netlify.app)
+
+## 🎯 Objectives
+
+- Predict app success using machine learning techniques
+- Analyze the relationship between app features and installation counts
+- Provide developers with data-driven insights for pre-launch decision making
+- Perform sentiment analysis on user reviews to understand user satisfaction
+
+## 📁 Repository Structure
 
 ```
-├── backend/          # Flask API server
-│   ├── app.py       # Main API application
-│   ├── model_trainer.py  # Model training script
-│   └── requirements.txt
+├── backend/                    # Flask API server
+│   ├── app.py                 # Main API application
+│   ├── model_trainer.py       # KNN model training script
+│   ├── knn_model.pkl          # Trained KNN model
+│   ├── encoders.pkl           # Feature encoders
+│   ├── scaler.pkl             # Feature scaler
+│   └── requirements.txt       # Python dependencies
 │
-├── frontend/        # React web application
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── index.css
-│   │   └── main.jsx
-│   └── package.json
+├── frontend/                   # React web application
+│   ├── src/                   # Source files
+│   └── package.json           # Node dependencies
 │
-└── google_play_store_dataset.csv  # Training data
+├── initial_datasets/           # Raw Kaggle datasets
+│   ├── googleplaystore.csv
+│   └── googleplaystore_user_reviews.csv
+│
+├── google-play-store-analysis-2.ipynb  # Jupyter notebook with analysis
+├── model.csv                   # Processed dataset
+└── README.md                   # Project documentation
 ```
 
-## 🚀 Quick Start
+## 🔬 Methodology
+
+### Dataset
+- **Source:** Kaggle - Google Play Store Apps dataset
+- **Size:** ~10,000 app records
+- **Features:** App Name, Category, Rating, Reviews, Size, Installs, Type, Price, Content Rating, Genres
+
+### Data Preprocessing
+1. Removed duplicates and handled missing values
+2. Normalized size values to MB
+3. Converted install counts and prices to numeric format
+4. Imputed missing ratings using Random Forest Regressor
+5. Applied label encoding for categorical variables
+6. Standardized features using Standard Scaler
+
+### Feature Engineering
+- Created binary target variable: **Success** (Hit/Flop)
+- Definition: App is a "Hit" if installs > category median installs
+- Engineered temporal features like `Days_Since_Update`
+- Created engagement metrics: `Reviews/Installs` ratio
+
+### Model Training
+- **Algorithm:** K-Nearest Neighbors (KNN)
+- **Train/Test Split:** 80/20
+- **Hyperparameter Tuning:** Tested K values from 1-20
+- **Optimal K:** 7 neighbors
+- **Accuracy:** ~85%
+
+## � Setup Instructions
 
 ### Prerequisites
-
 - Python 3.8+
 - Node.js 16+
 - npm or yarn
 
 ### Backend Setup
 
-1. **Navigate to backend directory:**
-   ```bash
-   cd backend
-   ```
+```bash
+# Navigate to backend directory
+cd backend
 
-2. **Install Python dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+# Create virtual environment (recommended)
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-3. **Copy the dataset:**
-   - Place `google_play_store_dataset.csv` in the `backend/` directory
-   - Or download from Kaggle: [Google Play Store Dataset](https://www.kaggle.com/datasets)
+# Install dependencies
+pip install -r requirements.txt
 
-4. **Train the model:**
-   ```bash
-   python model_trainer.py
-   ```
-   This creates:
-   - `knn_model.pkl` - Trained model
-   - `encoders.pkl` - Feature encoders
-   - `scaler.pkl` - Feature scaler
-   - `model_metadata.json` - Model metadata
+# Start the server
+python app.py
+```
 
-5. **Start the API server:**
-   ```bash
-   python app.py
-   ```
-   Server runs on `http://localhost:5000`
+The API will run on `http://localhost:5001`
 
 ### Frontend Setup
 
-1. **Navigate to frontend directory:**
-   ```bash
-   cd frontend
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
-   Frontend runs on `http://localhost:3000`
-
-4. **Open in browser:**
-   Visit `http://localhost:3000`
-
-## 📊 Features
-
-### Backend
-- ✅ RESTful API with Flask
-- ✅ KNN machine learning model
-- ✅ Input validation and error handling
-- ✅ CORS enabled for frontend communication
-- ✅ Model metadata endpoint
-- ✅ Health check endpoint
-
-### Frontend
-- ✅ Modern, responsive UI
-- ✅ Real-time predictions
-- ✅ Interactive form with validation
-- ✅ Visual confidence indicators
-- ✅ Glassmorphism design
-- ✅ Smooth animations
-- ✅ Error handling
-
-## 🎨 UI Preview
-
-The frontend features:
-- **Gradient background** with purple/blue theme
-- **Glassmorphism cards** with backdrop blur
-- **Animated elements** for better UX
-- **Responsive design** for all devices
-- **Visual feedback** for predictions
-
-## 🔌 API Endpoints
-
-### GET `/api/metadata`
-Returns available categories, types, and content ratings.
-
-**Response:**
-```json
-{
-  "categories": ["GAME", "TOOLS", ...],
-  "types": ["Free", "Paid"],
-  "content_ratings": ["Everyone", "Teen", ...],
-  "accuracy": 0.85,
-  "best_k": 7
-}
-```
-
-### POST `/api/predict`
-Predicts app success.
-
-**Request:**
-```json
-{
-  "category": "GAME",
-  "size": 95.0,
-  "type": "Paid",
-  "price": 2.99,
-  "contentRating": "Everyone"
-}
-```
-
-**Response:**
-```json
-{
-  "prediction": "Hit",
-  "success": true,
-  "confidence": 78.5,
-  "message": "Good potential for success based on similar apps. ✅",
-  "details": { ... }
-}
-```
-
-## 🧪 Model Details
-
-- **Algorithm:** K-Nearest Neighbors (KNN)
-- **Features:** Category, Size, Type, Price, Content Rating
-- **Target:** Success (based on installs vs category median)
-- **Preprocessing:** Label encoding + Standard scaling
-- **Accuracy:** ~85% (varies by dataset)
-
-## 📝 Usage Example
-
-1. Select app category (e.g., "GAME")
-2. Enter app size in MB (e.g., 95.0)
-3. Choose type (Free or Paid)
-4. Set price if paid (e.g., 2.99)
-5. Select content rating (e.g., "Everyone")
-6. Click "Predict Success"
-7. View results with confidence score
-
-## 🛠️ Development
-
-### Backend Development
 ```bash
-cd backend
-python app.py  # Runs with auto-reload
-```
-
-### Frontend Development
-```bash
+# Navigate to frontend directory
 cd frontend
-npm run dev  # Hot module replacement enabled
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-### Production Build
-```bash
-cd frontend
-npm run build  # Creates optimized build in dist/
-```
+The frontend will run on `http://localhost:3000`
 
-## 📦 Dependencies
+## � Results
 
-### Backend
-- Flask 3.0.0
-- Flask-CORS 4.0.0
-- scikit-learn 1.3.2
-- pandas 2.1.4
-- numpy 1.26.2
+- **Model Accuracy:** 85%
+- **Optimal K Value:** 7
+- **Key Findings:**
+  - Category and install count are strong predictors of success
+  - Paid apps tend to have higher ratings than free apps
+  - App size shows moderate correlation with success
+  - Sentiment analysis reveals bugs and ads are common negative factors
 
-### Frontend
-- React 18.2.0
-- Axios 1.6.2
-- Vite 5.0.8
+## 🌐 Deployment
 
-## 🤝 Contributing
+- **Frontend:** Deployed on Netlify - [https://frontend-model.netlify.app](https://frontend-model.netlify.app)
+- **Backend API:** Deployed on Render - [https://google-play-store-analysis.onrender.com](https://google-play-store-analysis.onrender.com)
 
-This project is part of a Google Play Store data mining analysis. Feel free to:
-- Report bugs
-- Suggest features
-- Submit pull requests
+## 📄 Documentation
 
-## 📄 License
+For detailed analysis and methodology, refer to:
+- **Project Report:** `report.pdf` (in repository)
+- **Analysis Notebook:** `google-play-store-analysis-2.ipynb`
 
-MIT License - feel free to use this project for learning and development.
+## 👥 Team
+
+**Vidhitt S**  
+Google Play Store Analysis Team
 
 ## 🙏 Acknowledgments
 
-- Dataset: Google Play Store Apps (Kaggle)
-- ML Algorithm: K-Nearest Neighbors
-- UI Inspiration: Modern glassmorphism design trends
+- Dataset: [Google Play Store Apps - Kaggle](https://www.kaggle.com/datasets)
+- Machine Learning: scikit-learn library
+- Framework: Flask & React
 
 ---
 
-**Built with ❤️ using Flask, React, and Machine Learning**
+**Data Mining Project - 2024**
