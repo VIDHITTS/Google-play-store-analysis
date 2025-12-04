@@ -7,9 +7,17 @@ __pycache__/
 env/
 venv/
 ENV/
+
+# Ignore all pkl, json, csv files by default
 *.pkl
 *.json
 *.csv
+
+# But allow backend model files
+!backend/*.pkl
+!backend/*.json
+!backend/google_play_store_dataset.csv
+
 
 # Node
 node_modules/
