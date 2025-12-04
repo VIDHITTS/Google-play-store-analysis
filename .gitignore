@@ -18,6 +18,10 @@ ENV/
 !backend/*.json
 !backend/google_play_store_dataset.csv
 
+# Allow package files
+!package.json
+!package-lock.json
+
 
 # Node
 node_modules/
