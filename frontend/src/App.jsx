@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+
 import './index.css';
 
 function App() {
@@ -16,6 +16,8 @@ function App() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
     useEffect(() => {
         // Fetch metadata on component mount
         fetchMetadata();
@@ -23,14 +25,18 @@ function App() {
 
     const fetchMetadata = async () => {
         try {
-            const response = await axios.get('/api/metadata');
-            setMetadata(response.data);
-            // Set default values
-            if (response.data.categories.length > 0) {
-                setFormData(prev => ({ ...prev, category: response.data.categories[0] }));
+            const response = await fetch(`${API_BASE_URL}/api/metadata`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch metadata');
             }
-            if (response.data.content_ratings.length > 0) {
-                setFormData(prev => ({ ...prev, contentRating: response.data.content_ratings[0] }));
+            const data = await response.json();
+            setMetadata(data);
+            // Set default values
+            if (data.categories.length > 0) {
+                setFormData(prev => ({ ...prev, category: data.categories[0] }));
+            }
+            if (data.content_ratings.length > 0) {
+                setFormData(prev => ({ ...prev, contentRating: data.content_ratings[0] }));
             }
         } catch (err) {
             setError('Failed to load metadata. Please ensure the backend is running.');
@@ -58,17 +64,29 @@ function App() {
         setPrediction(null);
 
         try {
-            const response = await axios.post('/api/predict', {
-                category: formData.category,
-                size: parseFloat(formData.size),
-                type: formData.type,
-                price: parseFloat(formData.price),
-                contentRating: formData.contentRating
+            const response = await fetch(`${API_BASE_URL}/api/predict`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    category: formData.category,
+                    size: parseFloat(formData.size),
+                    type: formData.type,
+                    price: parseFloat(formData.price),
+                    contentRating: formData.contentRating
+                }),
             });
 
-            setPrediction(response.data);
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || 'Prediction failed');
+            }
+
+            setPrediction(data);
         } catch (err) {
-            setError(err.response?.data?.error || 'Prediction failed. Please try again.');
+            setError(err.message || 'Prediction failed. Please try again.');
             console.error('Prediction error:', err);
         } finally {
             setLoading(false);
